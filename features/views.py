@@ -51,20 +51,20 @@ class UserFeatureView(generics.GenericAPIView):
         }, status=status.HTTP_200_OK)
     
     # features/user/{feature} - PUT - Enable a feature for a user providing the feature name in the request body
-    def put(self, request, feature):
+    def put(self, request, user_id, feature):
         try:
             feature_obj = Features.objects.get(feature=feature)
             status = Status(request.data.get("status", Status.Inactive))
-            feature_flag, created = FeatureFlag.objects.update_or_create(feature=feature_obj, user_id=request.user.id, status=status)
+            feature_flag, created = FeatureFlag.objects.update_or_create(feature=feature_obj, user_id=user_id, status=status)
             feature_flag.save()
 
             return JsonResponse({
-                "message": f"Feature '{feature}' is now {feature_flag.status} for user {request.user.id}",
-            }, status=status.HTTP_200_OK)
+                "message": f"Feature '{feature}' is now {feature_flag.status} for user {user_id}",
+            }, status=Status.HTTP_200_OK)
         except (Features.DoesNotExist, FeatureFlag.DoesNotExist):
             return JsonResponse({
-                "message": f"Feature '{feature}' does not exist or is not enabled for user {request.user.id}",
-            }, status=status.HTTP_404_NOT_FOUND)
+                "message": f"Feature '{feature}' does not exist or is not enabled for user {user_id}",
+            }, status=Status.HTTP_404_NOT_FOUND)
     
 # features/{userId} - GET - Get the list of features enabled for a user
 # features/{userId} - POST - Enable a feature for a user providing the feature name in the request body
